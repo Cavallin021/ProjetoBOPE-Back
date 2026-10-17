@@ -6,3 +6,79 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  GESTOR
+  MEMBRO
+}
+
+enum ClientStatus {
+  ATIVO
+  INATIVO
+}
+
+enum DealStage {
+  DIAGNOSTICA
+  PROPOSTA
+  NEGOCIACAO
+  GANHO
+  PERDIDO
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  username  String
+  role      Role       @default(MEMBRO)
+  createdAt DateTime   @default(now())
+
+  deals     Deal[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Client {
+  id         String       @id @default(uuid())
+  name       String
+  profession String
+  income     String
+  location   String
+  status     ClientStatus @default(ATIVO)
+  createdAt  DateTime     @default(now())
+
+  deals      Deal[]
+  auditLogs  AuditLog[]
+
+  @@map("clients")
+}
+
+model Deal {
+  id               String    @id @default(uuid())
+  clientId         String
+  ownerId          String
+  value            Decimal   @db.Decimal(12, 2)
+  stage            DealStage @default(DIAGNOSTICA)
+  lostReason       String?
+  firstContactDate DateTime  @default(now())
+  closedDate       DateTime?
+
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@map("deals")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  userId         String
+  action         String
+  targetClientId String?
+  timestamp      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetClient   Client?  @relation(fields: [targetClientId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
