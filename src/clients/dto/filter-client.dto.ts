@@ -1,5 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ClientProfession } from './create-client.dto';
+import { ClientStatus } from '@prisma/client';
 
 export class FilterClientDto {
   @IsOptional()
@@ -21,4 +22,8 @@ export class FilterClientDto {
   @IsOptional()
   @IsString()
   date?: string;
+
+  @IsOptional()
+  @IsEnum(ClientStatus)
+  status?: ClientStatus;
 }

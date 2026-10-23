@@ -15,9 +15,9 @@ export class ClientsService {
     });
   }
 
-  
+
   findAll(filters: FilterClientDto) {
-    const { name, location, income, profession, date } = filters;
+    const { name, location, income, profession, date, status } = filters;
     const where: Prisma.ClientWhereInput = {};
 
     if (name) {
@@ -64,6 +64,10 @@ export class ClientsService {
           lt: endDate,
         };
       }
+    }
+
+    if (status) {
+      where.status = status;
     }
 
     return this.prisma.client.findMany({

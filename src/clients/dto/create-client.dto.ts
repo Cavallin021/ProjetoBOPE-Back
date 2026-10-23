@@ -40,4 +40,5 @@ export class CreateClientDto {
   })
   @IsNotEmpty({ message: 'O campo "status" é obrigatório.' })
   status!: ClientStatus;
+  
 }
