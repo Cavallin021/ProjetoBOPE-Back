@@ -1,3 +1,37 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Neon
+.neon
+.neon/
+
+# AI Agents & IDEs
+.agents/
+.claude/
+.cursor/
+.devin/
+.gemini/
+.vscode/
+.idea/
+
+# Logs & Test coverage
+logs/
+*.log
+npm-debug.log*
+coverage/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
