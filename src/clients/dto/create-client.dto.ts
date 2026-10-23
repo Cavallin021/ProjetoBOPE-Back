@@ -1,7 +1,7 @@
 import { IsEnum, IsIn, IsNotEmpty, IsString } from 'class-validator';
 import { ClientStatus } from '@prisma/client';
 
-export const VALID_PROFESSIONS = [
+export const ClientProfession = [
   'Tecnologia',
   'Engenharia',
   'Saúde',
@@ -22,8 +22,8 @@ export class CreateClientDto {
 
   @IsString({ message: 'O campo "profession" deve ser uma string.' })
   @IsNotEmpty({ message: 'O campo "profession" é obrigatório.' })
-  @IsIn(VALID_PROFESSIONS, {
-    message: `O campo "profession" deve pertencer a uma das 11 áreas válidas: ${VALID_PROFESSIONS.join(', ')}.`,
+  @IsIn(ClientProfession, {
+    message: `O campo "profession" deve pertencer a uma das 11 áreas válidas: ${ClientProfession.join(', ')}.`,
   })
   profession!: string;
 
