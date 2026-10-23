@@ -2,49 +2,39 @@
   "name": "back",
   "version": "1.0.0",
   "description": "PTI Backend API",
-  "main": "dist/main.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
-    "build": "nest build",
-    "start": "node dist/main.js",
-    "start:dev": "nest start --watch",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
     "@neon/config": "^1.9.3",
     "@neon/env": "^1.6.4",
-=======
->>>>>>> ce6c6417807cc874f501c0a5a423c14895c25d98
     "@nestjs/common": "^12.2.0",
     "@nestjs/core": "^12.2.0",
     "@nestjs/mapped-types": "^12.0.0",
     "@nestjs/platform-express": "^12.2.0",
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> ce6c6417807cc874f501c0a5a423c14895c25d98
     "@prisma/client": "^6.19.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.15.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@nestjs/cli": "^11.0.0",
     "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.15.3",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
