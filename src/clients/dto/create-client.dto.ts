@@ -1,4 +1,4 @@
-import { IsEnum, IsIn, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsIn, IsNotEmpty, IsString ,IsNumber } from 'class-validator';
 import { ClientStatus } from '@prisma/client';
 
 export const ClientProfession = [
@@ -27,9 +27,9 @@ export class CreateClientDto {
   })
   profession!: string;
 
-  @IsString({ message: 'O campo "income" deve ser uma string.' })
+  @IsNumber({}, { message: 'O campo "income" deve ser um número.' })
   @IsNotEmpty({ message: 'O campo "income" é obrigatório.' })
-  income!: string;
+  income!: number;
 
   @IsString({ message: 'O campo "location" deve ser uma string.' })
   @IsNotEmpty({ message: 'O campo "location" é obrigatório.' })

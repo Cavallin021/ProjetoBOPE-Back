@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { Prisma } from '@prisma/client';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { FilterClientDto } from './dto/filter-client.dto';
 
 @Injectable()
@@ -10,6 +10,17 @@ export class ClientsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createClientDto: CreateClientDto) {
+      // busca no banco se ja existe um cliente c o nome 
+    const clientExists = await this.prisma.client.findFirst({
+      where: { name: createClientDto.name },
+    });
+
+    //se encontrar apresenta o exceção 
+    if (clientExists) {
+      throw new ConflictException('Já existe um cliente cadastrado com este nome.');
+    }
+
+    // se nao encontar criar normal mesmo 
     return await this.prisma.client.create({
       data: createClientDto,
     });
@@ -27,15 +38,18 @@ export class ClientsService {
       };
     }
 
-    if (location) {
-      where.location = {
-        contains: location,
-        mode: 'insensitive',
-      };
-    }
-
     if (income) {
-      where.income = income;
+      if (income.includes('-')) {
+        const [min, max] = income.split('-');
+       
+        where.income = {
+          gte: Number(min), 
+          lte: Number(max),
+        };
+      } else {
+        // converte para numero se for um valor exato "income=1000"
+        where.income = Number(income); 
+      }
     }
 
     if (profession) {

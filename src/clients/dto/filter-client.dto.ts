@@ -26,4 +26,5 @@ export class FilterClientDto {
   @IsOptional()
   @IsEnum(ClientStatus)
   status?: ClientStatus;
+  
 }

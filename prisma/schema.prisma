@@ -41,9 +41,9 @@ model User {
 
 model Client {
   id         String       @id @default(uuid())
-  name       String
+  name       String   
   profession String
-  income     String
+  income     Float
   location   String
   status     ClientStatus @default(ATIVO)
   createdAt  DateTime     @default(now())
