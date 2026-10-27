@@ -15,10 +15,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  // uso da variavel definida 
   await app.listen(port);
-  console.log(`🚀 NestJS Server running on http://localhost:${port}`);
+  console.log(`🚀 API do Projeto BOPE rodando em: http://localhost:${port}`);
 }
 
 void bootstrap();
