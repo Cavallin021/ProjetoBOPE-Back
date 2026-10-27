@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio"
   },
   "keywords": [],
