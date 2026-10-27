@@ -27,12 +27,16 @@ enum DealStage {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  username  String
-  role      Role       @default(MEMBRO)
-  createdAt DateTime   @default(now())
+  id               String  @id @default(uuid())
+  email            String  @unique
+  password         String
+  username         String
+  role             Role    @default(MEMBRO)
+  isBopePrimario   Boolean
+  isBopeSecundario Boolean @default(false)
+  isGuardiaoNdp    Boolean @default(false)
+
+  createdAt DateTime @default(now())
 
   deals     Deal[]
   auditLogs AuditLog[]
@@ -49,8 +53,8 @@ model Client {
   status     ClientStatus @default(ATIVO)
   createdAt  DateTime     @default(now())
 
-  deals      Deal[]
-  auditLogs  AuditLog[]
+  deals     Deal[]
+  auditLogs AuditLog[]
 
   @@map("clients")
 }
@@ -65,8 +69,8 @@ model Deal {
   firstContactDate DateTime  @default(now())
   closedDate       DateTime?
 
-  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  owner  User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
 
   @@map("deals")
 }
@@ -78,8 +82,8 @@ model AuditLog {
   targetClientId String?
   timestamp      DateTime @default(now())
 
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetClient   Client?  @relation(fields: [targetClientId], references: [id], onDelete: SetNull)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetClient Client? @relation(fields: [targetClientId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
 }
