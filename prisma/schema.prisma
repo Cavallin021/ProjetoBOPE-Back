@@ -32,11 +32,15 @@ enum DocumentType {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  username  String
-  role      Role     @default(MEMBRO)
+  id               String  @id @default(uuid())
+  email            String  @unique
+  password         String
+  username         String
+  role             Role    @default(MEMBRO)
+  isBopePrimario   Boolean
+  isBopeSecundario Boolean @default(false)
+  isGuardiaoNdp    Boolean @default(false)
+
   createdAt DateTime @default(now())
 
   dealsAsBope1    Deal[]     @relation("Bope1Deals")
@@ -56,9 +60,9 @@ model Client {
   status     ClientStatus @default(ATIVO)
   createdAt  DateTime     @default(now())
 
-  deals      Deal[]
-  documents  ClientDocument[]
-  auditLogs  AuditLog[]
+  deals     Deal[]
+  documents ClientDocument[]
+  auditLogs AuditLog[]
 
   @@map("clients")
 }
@@ -71,18 +75,18 @@ model ClientDocument {
   fileName  String?
   createdAt DateTime     @default(now())
 
-  client    Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("client_documents")
 }
 
 model Deal {
-  id               String    @id @default(uuid())
-  clientId         String
-  
-  bope1Id          String
-  bope2Id          String?
-  guardiaoNdpId    String? 
+  id       String @id @default(uuid())
+  clientId String
+
+  bope1Id       String
+  bope2Id       String?
+  guardiaoNdpId String?
 
   value            Decimal   @db.Decimal(12, 2)
   leadType         String?
@@ -91,11 +95,11 @@ model Deal {
   firstContactDate DateTime  @default(now())
   closedDate       DateTime?
 
-  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  bope1            User      @relation("Bope1Deals", fields: [bope1Id], references: [id], onDelete: Restrict)
-  bope2            User?     @relation("Bope2Deals", fields: [bope2Id], references: [id], onDelete: SetNull)
-  guardiaoNdp      User?     @relation("GuardiaoDeals", fields: [guardiaoNdpId], references: [id], onDelete: SetNull)
-  auditLogs        AuditLog[]
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  bope1       User       @relation("Bope1Deals", fields: [bope1Id], references: [id], onDelete: Restrict)
+  bope2       User?      @relation("Bope2Deals", fields: [bope2Id], references: [id], onDelete: SetNull)
+  guardiaoNdp User?      @relation("GuardiaoDeals", fields: [guardiaoNdpId], references: [id], onDelete: SetNull)
+  auditLogs   AuditLog[]
 
   @@map("deals")
 }
@@ -105,12 +109,12 @@ model AuditLog {
   userId         String
   action         String
   targetClientId String?
-  targetDealId   String?  // Necessário para a BACK-12 (auditoria de alterações da Lead)
+  targetDealId   String? // Necessário para a BACK-12 (auditoria de alterações da Lead)
   timestamp      DateTime @default(now())
 
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetClient   Client?  @relation(fields: [targetClientId], references: [id], onDelete: SetNull)
-  targetDeal     Deal?    @relation(fields: [targetDealId], references: [id], onDelete: Cascade)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetClient Client? @relation(fields: [targetClientId], references: [id], onDelete: SetNull)
+  targetDeal   Deal?   @relation(fields: [targetDealId], references: [id], onDelete: Cascade)
 
   @@map("audit_logs")
 }
