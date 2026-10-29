@@ -1,8 +1,9 @@
-import { IsEmail, IsNotEmpty, IsEnum, IsBoolean, IsOptional, MinLength, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsEnum, IsBoolean, IsOptional, MinLength, IsString, Matches } from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Formato de email inválido' })
+  @Matches(/@cjr\.org\.br$/, { message: 'Acesso restrito: utilize seu email corporativo da CJR' })  
   @IsNotEmpty()
   email!: string;
 
