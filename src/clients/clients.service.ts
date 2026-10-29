@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { Prisma } from '@prisma/client';
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException , NotFoundException } from '@nestjs/common';
 import { FilterClientDto } from './dto/filter-client.dto';
 
 @Injectable()
@@ -93,9 +93,36 @@ export class ClientsService {
   }
 
   async findOne(id: string) {
-    return await this.prisma.client.findUnique({
+    const client = await this.prisma.client.findUnique({
       where: { id },
+      include: {
+        deals: {
+          select: {
+            id: true,
+            value: true,
+            stage: true,
+            lostReason: true, // motivo das leads perdidas 
+            firstContactDate: true,
+            closedDate: true,
+          },
+          orderBy: {
+            firstContactDate: 'desc', // ordena das mais novas para as mais antigas
+          }
+        },
+        auditLogs: {
+          orderBy: {
+            timestamp: 'desc',
+          }
+        }
+      },
     });
+
+    // se  o cliente desejdo nao existir printa a mensagem 
+    if (!client) {
+      throw new NotFoundException('Cliente não encontrado no sistema.');
+    }
+
+    return client;
   }
 
   async update(id: string, updateClientDto: UpdateClientDto) {

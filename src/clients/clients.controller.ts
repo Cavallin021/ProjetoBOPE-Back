@@ -28,6 +28,9 @@ export class ClientsController {
     return this.clientsService.update(id, updateClientDto);
   }
 
+  // esperando a implementacao dos guards do BACK 04 para descomentar as linhas abaixo dos guard 
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('GESTOR')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.clientsService.remove(id);
