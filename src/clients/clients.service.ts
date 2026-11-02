@@ -113,6 +113,12 @@ export class ClientsService {
           orderBy: {
             timestamp: 'desc',
           }
+        },
+
+        documents:{
+          orderBy: {
+            createdAt: 'desc',
+          }
         }
       },
     });
