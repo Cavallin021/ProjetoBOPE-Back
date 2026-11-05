@@ -24,6 +24,8 @@ async function bootstrap() {
       .setTitle('API do Projeto BOPE')
       .setDescription('Documentação das rotas do back-end do Projeto BOPE')
       .setVersion('1.0')
+      // botão Authorize: cole o access_token do POST /auth/login
+      .addBearerAuth()
       .build();
     SwaggerModule.setup('docs', app, () => SwaggerModule.createDocument(app, swaggerConfig));
   }

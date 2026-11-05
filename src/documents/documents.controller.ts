@@ -10,12 +10,14 @@ import {
   Query,
   StreamableFile,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser, JwtPayload } from '../auth/decorators/current-user.decorator';
 import { DocumentsService } from './documents.service';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './documents.constants';
-import { RequestUserId } from './decorators/request-user-id.decorator';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { FilterDocumentDto } from './dto/filter-document.dto';
 import {
@@ -56,7 +58,7 @@ function contentDisposition(fileName: string) {
   return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`;
 }
 
-// TODO: proteger com o AuthGuard quando a auth (BACK-04) entrar na dev
+@UseGuards(AuthGuard)
 @ApiDocumentsController()
 @Controller('clients/:clientId')
 export class DocumentsController {
@@ -69,12 +71,12 @@ export class DocumentsController {
     @Param('clientId', ParseUUIDPipe) clientId: string,
     @Body() uploadDocumentDto: UploadDocumentDto,
     @UploadedFile() file: Express.Multer.File | undefined,
-    @RequestUserId() userId: string,
+    @CurrentUser() user: JwtPayload,
   ) {
     if (!file) {
       throw new BadRequestException('O arquivo é obrigatório (campo "file").');
     }
-    return this.documentsService.upload(clientId, uploadDocumentDto.type, file, userId);
+    return this.documentsService.upload(clientId, uploadDocumentDto.type, file, user.sub);
   }
 
   @Get('documents')
@@ -102,9 +104,9 @@ export class DocumentsController {
   remove(
     @Param('clientId', ParseUUIDPipe) clientId: string,
     @Param('documentId', ParseUUIDPipe) documentId: string,
-    @RequestUserId() userId: string,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.documentsService.remove(clientId, documentId, userId);
+    return this.documentsService.remove(clientId, documentId, user.sub);
   }
 
   @Get('proposal-logs')

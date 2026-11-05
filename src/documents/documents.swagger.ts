@@ -1,10 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
-  ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -12,6 +12,7 @@ import {
   ApiPayloadTooLargeResponse,
   ApiProduces,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { DocumentType } from '@prisma/client';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './documents.constants';
@@ -25,21 +26,15 @@ import {
 
 const MAX_FILE_SIZE_MB = MAX_FILE_SIZE / 1024 / 1024;
 
-// TODO: trocar pelo @ApiBearerAuth() quando a auth (BACK-04) entrar na dev
-const ApiUserIdHeader = () =>
-  ApiHeader({
-    name: 'x-user-id',
-    required: true,
-    description:
-      'Id do usuário que está fazendo a ação, gravado no audit_logs. Temporário: será substituído pelo token JWT quando a autenticação entrar.',
-  });
-
 const ApiClientNotFound = () =>
   ApiNotFoundResponse({ description: 'Cliente não encontrado no sistema.' });
 
+// todas as rotas exigem o token do login; o usuário do token é quem fica registrado no audit_logs
 export const ApiDocumentsController = () =>
   applyDecorators(
     ApiTags('Documentos (proposta e contrato)'),
+    ApiBearerAuth(),
+    ApiUnauthorizedResponse({ description: 'Token ausente, inválido ou expirado.' }),
     ApiParam({ name: 'clientId', format: 'uuid', description: 'Id do cliente dono do dossiê' }),
   );
 
@@ -52,7 +47,6 @@ export const ApiUploadDocument = () =>
         'mantendo as versões anteriores. O envio é registrado no audit_logs do cliente ' +
         '(PROPOSTA_ENVIADA ou CONTRATO_ENVIADO); os envios de proposta formam o log de propostas enviadas.',
     }),
-    ApiUserIdHeader(),
     ApiConsumes('multipart/form-data'),
     ApiBody({
       schema: {
@@ -65,11 +59,8 @@ export const ApiUploadDocument = () =>
       },
     }),
     ApiCreatedResponse({ type: DocumentResponseDto, description: 'Documento salvo.' }),
-    ApiBadRequestResponse({
-      description:
-        'Arquivo ausente, formato não aceito, tipo inválido ou header x-user-id ausente/inválido.',
-    }),
-    ApiNotFoundResponse({ description: 'Cliente ou usuário não encontrado.' }),
+    ApiBadRequestResponse({ description: 'Arquivo ausente, formato não aceito ou tipo inválido.' }),
+    ApiClientNotFound(),
     ApiPayloadTooLargeResponse({ description: `Arquivo maior que ${MAX_FILE_SIZE_MB} MB.` }),
   );
 
@@ -109,11 +100,9 @@ export const ApiRemoveDocument = () =>
         'Apaga o documento e o arquivo (no Google Drive ele vai para a lixeira). ' +
         'A remoção fica registrada no audit_logs (PROPOSTA_REMOVIDA ou CONTRATO_REMOVIDO).',
     }),
-    ApiUserIdHeader(),
     ApiParam({ name: 'documentId', format: 'uuid' }),
     ApiOkResponse({ type: MessageResponseDto }),
-    ApiBadRequestResponse({ description: 'Header x-user-id ausente ou inválido.' }),
-    ApiNotFoundResponse({ description: 'Documento ou usuário não encontrado.' }),
+    ApiNotFoundResponse({ description: 'Documento não encontrado.' }),
   );
 
 export const ApiListProposalLogs = () =>

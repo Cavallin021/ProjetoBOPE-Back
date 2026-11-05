@@ -22,7 +22,6 @@ export class DocumentsService {
 
   async upload(clientId: string, type: DocumentType, file: Express.Multer.File, userId: string) {
     await this.ensureClientExists(clientId);
-    await this.ensureUserExists(userId);
 
     const fileName = file.originalname;
     const fileUrl = await this.storage.save({
@@ -84,7 +83,6 @@ export class DocumentsService {
 
   async remove(clientId: string, documentId: string, userId: string) {
     const document = await this.findDocument(clientId, documentId);
-    await this.ensureUserExists(userId);
     const fileName = document.fileName ?? document.id;
 
     // o documento sai do dossiê, mas a remoção fica registrada no audit_logs
@@ -144,18 +142,6 @@ export class DocumentsService {
 
     if (!client) {
       throw new NotFoundException('Cliente não encontrado no sistema.');
-    }
-  }
-
-  // enquanto o id vem do header x-user-id, ele precisa ser conferido (com a auth, o token já garante)
-  private async ensureUserExists(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
-    });
-
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado.');
     }
   }
 }
