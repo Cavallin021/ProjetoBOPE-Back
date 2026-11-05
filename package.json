@@ -21,6 +21,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@googleapis/drive": "^27.0.0",
     "@neon/config": "^1.9.3",
     "@neon/env": "^1.6.4",
     "@nestjs/common": "^12.2.0",
