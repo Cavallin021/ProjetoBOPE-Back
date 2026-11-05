@@ -1,14 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DocumentType, Prisma } from '@prisma/client';
-import { randomUUID } from 'crypto';
-import { extname } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from './storage.service';
-import {
-  ALLOWED_MIME_TYPES,
-  DOCUMENT_ACTIONS,
-  MIME_TYPE_BY_EXTENSION,
-} from './documents.constants';
+import { DOCUMENT_ACTIONS } from './documents.constants';
 import { FilterDocumentDto } from './dto/filter-document.dto';
 
 const DOCUMENT_SELECT = {
@@ -30,10 +24,13 @@ export class DocumentsService {
     await this.ensureClientExists(clientId);
     await this.ensureUserExists(userId);
 
-    const fileUrl = `clients/${clientId}/${randomUUID()}${ALLOWED_MIME_TYPES[file.mimetype]}`;
     const fileName = file.originalname;
-
-    await this.storage.save(fileUrl, file.buffer);
+    const fileUrl = await this.storage.save({
+      clientId,
+      fileName,
+      mimeType: file.mimetype,
+      content: file.buffer,
+    });
 
     try {
       // o registro no audit_logs é o log de propostas enviadas (e também guarda quem enviou contratos)
@@ -53,7 +50,7 @@ export class DocumentsService {
 
       return document;
     } catch (error) {
-      // se o registro não foi salvo, o arquivo não pode ficar órfão no disco
+      // se o registro não foi salvo, o arquivo não pode ficar órfão no armazenamento
       await this.storage.remove(fileUrl);
       throw error;
     }
@@ -72,16 +69,16 @@ export class DocumentsService {
   async getFile(clientId: string, documentId: string) {
     const document = await this.findDocument(clientId, documentId);
 
-    const size = await this.storage.getSize(document.fileUrl);
-    if (size === null) {
+    const stored = await this.storage.stat(document.fileUrl);
+    if (!stored) {
       throw new NotFoundException('Arquivo não encontrado no armazenamento.');
     }
 
     return {
-      stream: this.storage.createReadStream(document.fileUrl),
+      stream: await this.storage.read(document.fileUrl),
       fileName: document.fileName ?? `${document.type.toLowerCase()}-${document.id}`,
-      mimeType: MIME_TYPE_BY_EXTENSION[extname(document.fileUrl)] ?? 'application/octet-stream',
-      size,
+      mimeType: stored.mimeType,
+      size: stored.size,
     };
   }
 

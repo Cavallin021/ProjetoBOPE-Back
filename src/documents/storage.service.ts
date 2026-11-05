@@ -1,41 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { createReadStream, ReadStream } from 'fs';
-import { mkdir, rm, stat, writeFile } from 'fs/promises';
-import { dirname, resolve, sep } from 'path';
+import { Readable } from 'stream';
 
-@Injectable()
-export class StorageService {
-  private readonly rootDir = resolve(process.env.UPLOAD_DIR || 'uploads');
+export interface FileToStore {
+  clientId: string;
+  fileName: string;
+  mimeType: string;
+  content: Buffer;
+}
 
-  async save(relativePath: string, content: Buffer) {
-    const absolutePath = this.resolvePath(relativePath);
-    await mkdir(dirname(absolutePath), { recursive: true });
-    await writeFile(absolutePath, content);
-  }
+export interface StoredFileInfo {
+  size: number;
+  mimeType: string;
+}
 
-  async remove(relativePath: string) {
-    await rm(this.resolvePath(relativePath), { force: true });
-  }
+// contrato comum dos armazenamentos; o driver é escolhido por STORAGE_DRIVER (local | drive)
+export abstract class StorageService {
+  // salva o arquivo e devolve a chave que vai para client_documents.fileUrl
+  abstract save(file: FileToStore): Promise<string>;
 
-  // tamanho em bytes, ou null se o arquivo não existir no disco
-  async getSize(relativePath: string) {
-    try {
-      return (await stat(this.resolvePath(relativePath))).size;
-    } catch {
-      return null;
-    }
-  }
+  abstract remove(key: string): Promise<void>;
 
-  createReadStream(relativePath: string): ReadStream {
-    return createReadStream(this.resolvePath(relativePath));
-  }
+  // null quando o arquivo não existe mais no armazenamento
+  abstract stat(key: string): Promise<StoredFileInfo | null>;
 
-  // impede que um caminho salvo no banco aponte para fora do diretório de uploads
-  private resolvePath(relativePath: string) {
-    const absolutePath = resolve(this.rootDir, relativePath);
-    if (!absolutePath.startsWith(this.rootDir + sep)) {
-      throw new Error(`Caminho de arquivo inválido: ${relativePath}`);
-    }
-    return absolutePath;
-  }
+  abstract read(key: string): Promise<Readable>;
 }
