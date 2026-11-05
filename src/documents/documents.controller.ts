@@ -18,6 +18,14 @@ import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './documents.constants';
 import { RequestUserId } from './decorators/request-user-id.decorator';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { FilterDocumentDto } from './dto/filter-document.dto';
+import {
+  ApiDocumentsController,
+  ApiDownloadDocument,
+  ApiListDocuments,
+  ApiListProposalLogs,
+  ApiRemoveDocument,
+  ApiUploadDocument,
+} from './documents.swagger';
 
 const uploadOptions = {
   limits: { fileSize: MAX_FILE_SIZE, files: 1 },
@@ -49,11 +57,13 @@ function contentDisposition(fileName: string) {
 }
 
 // TODO: proteger com o AuthGuard quando a auth (BACK-04) entrar na dev
+@ApiDocumentsController()
 @Controller('clients/:clientId')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post('documents')
+  @ApiUploadDocument()
   @UseInterceptors(FileInterceptor('file', uploadOptions))
   upload(
     @Param('clientId', ParseUUIDPipe) clientId: string,
@@ -68,11 +78,13 @@ export class DocumentsController {
   }
 
   @Get('documents')
+  @ApiListDocuments()
   findAll(@Param('clientId', ParseUUIDPipe) clientId: string, @Query() filters: FilterDocumentDto) {
     return this.documentsService.findAll(clientId, filters);
   }
 
   @Get('documents/:documentId/download')
+  @ApiDownloadDocument()
   async download(
     @Param('clientId', ParseUUIDPipe) clientId: string,
     @Param('documentId', ParseUUIDPipe) documentId: string,
@@ -86,6 +98,7 @@ export class DocumentsController {
   }
 
   @Delete('documents/:documentId')
+  @ApiRemoveDocument()
   remove(
     @Param('clientId', ParseUUIDPipe) clientId: string,
     @Param('documentId', ParseUUIDPipe) documentId: string,
@@ -95,6 +108,7 @@ export class DocumentsController {
   }
 
   @Get('proposal-logs')
+  @ApiListProposalLogs()
   findProposalLogs(@Param('clientId', ParseUUIDPipe) clientId: string) {
     return this.documentsService.findProposalLogs(clientId);
   }
