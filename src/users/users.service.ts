@@ -36,4 +36,17 @@ export class UsersService {
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
+
+  async findAllForSelects() {
+    return prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        role: true,
+      },
+      orderBy: {
+        username: 'asc',
+      },
+    });
+  }
 }
