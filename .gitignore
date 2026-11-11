@@ -6,6 +6,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Uploads (arquivos enviados ficam fora do git)
+uploads/
+
 # Environment variables
 .env
 .env.*
